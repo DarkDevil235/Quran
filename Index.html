@@ -1,96 +1,424 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Permission Required</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-dark: #B8860B;
+            --mushaf-border-url: url('https://i.ibb.co/0krdwmd/images.jpg');
+            --main-home-bg: url('https://i.ibb.co/fVYxNPXh/IMG-20260216-221428-437.jpg');
+            --bg-para-speak: url('https://i.ibb.co/XrTpL84h/images-2.jpg');
+            --bg-surah-list: url('https://i.ibb.co/DfTjkh2J/images-3.jpg');
+            --bg-para-list: url('https://i.ibb.co/27kpTrvj/images-4.jpg');
+        }
 
-<style>
+        body {
+            background-color: #000;
+            font-family: 'Scheherazade New', serif;
+            user-select: none;
+            overflow: hidden;
+            color: #fff;
+        }
 
-body{
-font-family: Arial, sans-serif;
-background:#0f172a;
-color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-}
+        /* Home View Container */
+        #view-home {
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8)), var(--main-home-bg);
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 24px;
+        }
 
-.container{
-background:#1e293b;
-padding:25px;
-border-radius:12px;
-max-width:380px;
-text-align:center;
+        /* Category Card Styling */
+        .category-card {
+            background-size: cover;
+            background-position: center;
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .btn-speak { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-para-speak); }
+        .btn-surah { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-surah-list); }
+        .btn-para  { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), var(--bg-para-list); }
 
-}
+        /* Mushaf Reader Styling */
+        .mushaf-viewport {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
 
-button{
-margin-top:15px;
-padding:10px 20px;
-border:none;
-border-radius:6px;
-background:#00ffd5;
-color:black;
-font-weight:bold;
-cursor:pointer;
-}
+        .mushaf-page {
+            width: 98%;
+            max-width: 550px;
+            height: 96vh;
+            background-image: var(--mushaf-border-url);
+            background-size: 100% 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            filter: brightness(0.9) contrast(1.1);
+        }
 
-</style>
+        /* Top Stats Bar Inside Page */
+        .top-info-bar {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(184, 134, 11, 0.3);
+            z-index: 50;
+            color: #444;
+            font-family: sans-serif;
+            font-size: 11px;
+            font-weight: bold;
+        }
 
+        .quran-container {
+            flex: 1;
+            margin: 80px 45px 95px 45px; /* Adjusted top margin for stats bar */
+            overflow-y: auto;
+            text-align: justify;
+            line-height: 2.3;
+            font-size: 1.8rem;
+            color: #1a1a1a;
+            scrollbar-width: none;
+        }
+        .quran-container::-webkit-scrollbar { display: none; }
+
+        .ayah-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--gold-dark);
+            border-radius: 50%;
+            font-size: 12px;
+            margin: 0 4px;
+            font-family: sans-serif;
+            color: var(--gold-dark);
+            background: rgba(255,255,255,0.9);
+            vertical-align: middle;
+        }
+        .ayah-circle.active {
+            background: var(--gold-dark);
+            color: white;
+            box-shadow: 0 0 10px var(--gold-dark);
+        }
+
+        .surah-tag {
+            text-align: center;
+            font-family: 'Amiri', serif;
+            font-size: 1.6rem;
+            color: #704214;
+            margin: 12px 0;
+            border-bottom: 1px double #ccc;
+        }
+
+        .control-bar {
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 10px 20px;
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .nav-btn { color: #000; font-weight: 800; cursor: pointer; }
+        .play-btn { background: var(--gold-dark); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+        #btn-close-reader {
+            position: absolute;
+            top: 20px; right: 20px;
+            z-index: 110;
+            background: rgba(0,0,0,0.6);
+            color: white; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--gold-dark);
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+    <main id="app-container">
+        
+        <!-- Home View -->
+        <div id="view-home">
+            <div class="mb-10 text-center">
+                <h1 class="text-5xl font-extrabold text-amber-500 mb-2 drop-shadow-lg">القرآن الكريم</h1>
+                <p class="text-zinc-200 text-sm tracking-widest opacity-80 uppercase">The Holy Quran Digital</p>
+            </div>
+            
+            <div class="grid gap-5 max-w-sm mx-auto w-full">
+                <button onclick="openMenu('speak-juz')" class="category-card btn-speak p-8 text-white flex items-center justify-between group">
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-amber-300">All Para Speak</p>
+                        <p class="text-sm opacity-80">Listen Para 1 to 30</p>
+                    </div>
+                    <div class="text-4xl">🔊</div>
+                </button>
 
-<h2>⚠ Permission Required / अनुमति आवश्यक</h2>
+                <button onclick="openMenu('juz')" class="category-card btn-para p-8 text-white flex items-center justify-between">
+                    <div class="text-right">
+                        <p class="text-2xl font-bold">Para List</p>
+                        <p class="text-sm opacity-80">Juz 1 to 30</p>
+                    </div>
+                    <div class="text-4xl">📖</div>
+                </button>
 
-<p>
-इस ऐप को सही तरीके से काम करने के लिए कुछ आवश्यक permissions की जरूरत है।<br>
-This app requires some important permissions to work properly.
-</p>
+                <button onclick="openMenu('surah')" class="category-card btn-surah p-8 text-white flex items-center justify-between">
+                    <div class="text-right">
+                        <p class="text-2xl font-bold">Surah List</p>
+                        <p class="text-sm opacity-80">114 Surahs</p>
+                    </div>
+                    <div class="text-4xl">🕋</div>
+                </button>
+            </div>
+            
+            <div id="home-loader" class="mt-8 flex justify-center hidden">
+                <div class="loader"></div>
+            </div>
+        </div>
 
-<p>
+        <!-- List View -->
+        <div id="view-list" class="hidden fixed inset-0 z-[120] overflow-y-auto p-6" style="background-size: cover; background-position: center;">
+            <div class="flex items-center justify-between mb-8 sticky top-0 py-4 z-10 bg-black/60 backdrop-blur-md rounded-b-2xl px-4">
+                <button onclick="changeView('view-home')" class="text-amber-400 text-xl font-bold">✕ Close</button>
+                <h2 id="menu-title" class="text-xl font-bold">Select</h2>
+                <div class="w-10"></div>
+            </div>
+            <div id="items-list" class="grid gap-4 pb-12"></div>
+        </div>
 
-<b>Steps / स्टेप्स:</b><br><br>
+        <!-- Reader View -->
+        <div id="view-reader" class="hidden fixed inset-0 z-[100]">
+            <button id="btn-close-reader" onclick="changeView('view-home')">✕</button>
+            
+            <div class="mushaf-viewport">
+                <div id="mushaf-card" class="mushaf-page">
+                    <!-- Stats Bar at Top Center -->
+                    <div class="top-info-bar">
+                        <span id="info-ayat">Ayat: --</span>
+                        <span id="info-ruku">Ruku: --</span>
+                        <span id="info-sajda">Sajda: --</span>
+                    </div>
 
-1️⃣ ऐप आइकन पर कुछ सेकंड तक दबाकर रखें।<br>
-Press and hold the app icon.<br><br>
+                    <div id="page-indicator" class="absolute top-[18px] left-1/2 -translate-x-1/2 text-[10px] font-bold text-zinc-400">PAGE 1</div>
+                    <div id="quran-render-area" class="quran-container" dir="rtl"></div>
+                    
+                    <div class="control-bar">
+                        <button onclick="flipPage(1)" class="nav-btn">← Next</button>
+                        <button onclick="togglePlay()" class="play-btn">
+                            <svg id="play-icon" viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button onclick="flipPage(-1)" class="nav-btn">Back →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-2️⃣ <b>App Info</b> पर क्लिक करें।<br>
-Tap on <b>App Info</b>.<br><br>
+    <audio id="main-audio-player"></audio>
 
-3️⃣ <b>Permissions</b> सेक्शन में जाएँ।<br>
-Go to <b>Permissions</b> section.<br><br>
+    <script>
+        const audio = document.getElementById('main-audio-player');
+        let currentAyahs = [];
+        let currentPage = 0;
+        const ayahsPerPage = 18; 
+        let isAutoPlaying = false;
+        let activeAyahIndex = -1;
+        let startAutoPlay = false;
 
-4️⃣ सभी permissions को <b>Allow</b> करें।<br>
-Allow all permissions.
-</p>
+        const bgUrls = {
+            'speak-juz': 'url("https://i.ibb.co/XrTpL84h/images-2.jpg")',
+            'surah': 'url("https://i.ibb.co/DfTjkh2J/images-3.jpg")',
+            'juz': 'url("https://i.ibb.co/27kpTrvj/images-4.jpg")'
+        };
 
-<button onclick="stopReminder()">OK / समझ गया</button>
+        function changeView(viewId) {
+            ['view-home', 'view-list', 'view-reader'].forEach(v => document.getElementById(v).classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            if (viewId !== 'view-reader') { stopAudio(); startAutoPlay = false; }
+        }
 
-</div>
+        async function openMenu(type) {
+            const list = document.getElementById('items-list');
+            const listView = document.getElementById('view-list');
+            list.innerHTML = '';
+            listView.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), ${bgUrls[type]}`;
+            
+            changeView('view-list');
+            const isSpeakMode = type === 'speak-juz';
+            document.getElementById('menu-title').innerText = isSpeakMode ? "Para Audio" : (type === 'juz' ? "Para List" : "Surah List");
 
-<script>
+            if (type === 'juz' || isSpeakMode) {
+                for (let i = 1; i <= 30; i++) {
+                    createItem(`Para ${i}`, `Juz ${i}`, () => {
+                        if(isSpeakMode) startAutoPlay = true;
+                        loadReader('juz', i);
+                    });
+                }
+            } else {
+                document.getElementById('home-loader').classList.remove('hidden');
+                const r = await fetch('https://api.alquran.cloud/v1/surah');
+                const d = await r.json();
+                document.getElementById('home-loader').classList.add('hidden');
+                d.data.forEach(s => createItem(s.englishName, s.name, () => loadReader('surah', s.number)));
+            }
+        }
 
-function showAlert(){
-alert("⚠ महत्वपूर्ण सूचना / Important Notice\n\nकृपया App Info → Permissions में जाकर सभी permissions Allow करें।\n\nPlease go to App Info → Permissions and allow all permissions so the app works properly.");
-}
+        function createItem(t1, t2, cb) {
+            const d = document.createElement('div');
+            d.className = "bg-black/40 backdrop-blur-sm border border-white/10 p-5 rounded-3xl flex justify-between items-center cursor-pointer hover:border-amber-500 transition-all shadow-lg";
+            d.innerHTML = `<div class="text-right"><p class="font-bold text-amber-400 text-lg">${t1}</p><p class="text-xs text-zinc-300">${t2}</p></div><span class="text-zinc-400">View →</span>`;
+            d.onclick = cb;
+            document.getElementById('items-list').appendChild(d);
+        }
 
-showAlert()
+        async function loadReader(type, id) {
+            document.getElementById('home-loader').classList.remove('hidden');
+            const url = type === 'juz' ? `https://api.alquran.cloud/v1/juz/${id}/quran-uthmani` : `https://api.alquran.cloud/v1/surah/${id}/quran-uthmani`;
+            const r = await fetch(url);
+            const d = await r.json();
+            document.getElementById('home-loader').classList.add('hidden');
+            
+            currentAyahs = d.data.ayahs;
+            currentPage = 0;
+            activeAyahIndex = -1;
+            
+            // Calculate Stats
+            updateStats(currentAyahs);
+            
+            changeView('view-reader');
+            renderPage();
+            if(startAutoPlay) setTimeout(() => playAyah(0), 600);
+        }
 
-// हर 3-5 सेकंड में alert
-let reminder = setInterval(showAlert,4000)
+        function updateStats(ayahs) {
+            const ayatCount = ayahs.length;
+            const rukuCount = new Set(ayahs.map(a => a.ruku)).size;
+            const sajdaCount = ayahs.filter(a => a.sajda !== false).length;
+            
+            document.getElementById('info-ayat').innerText = `Ayat: ${ayatCount}`;
+            document.getElementById('info-ruku').innerText = `Ruku: ${rukuCount}`;
+            document.getElementById('info-sajda').innerText = `Sajda: ${sajdaCount}`;
+        }
 
-function stopReminder(){
-clearInterval(reminder)
-alert("धन्यवाद! कृपया सभी permissions Allow करें।\n\nThank you! Please allow all permissions.");
-}
+        function renderPage() {
+            const area = document.getElementById('quran-render-area');
+            const start = currentPage * ayahsPerPage;
+            const pageData = currentAyahs.slice(start, start + ayahsPerPage);
+            document.getElementById('page-indicator').innerText = `PAGE ${currentPage + 1}`;
 
-</script>
+            let html = "";
+            let lastSurah = "";
+            pageData.forEach((a, i) => {
+                const idx = start + i;
+                if (a.surah && a.surah.name !== lastSurah) {
+                    html += `<div class="surah-tag">${a.surah.name}</div>`;
+                    lastSurah = a.surah.name;
+                }
+                html += ` ${a.text} <span class="ayah-circle" id="mark-${idx}" onclick="playAyah(${idx})">${a.numberInSurah}</span> `;
+            });
+            area.innerHTML = html;
+            area.scrollTop = 0;
+            updateHighlight();
+        }
 
+        function flipPage(dir) {
+            const next = currentPage + dir;
+            if (next >= 0 && next < Math.ceil(currentAyahs.length / ayahsPerPage)) {
+                currentPage = next;
+                renderPage();
+                if (isAutoPlaying) playAyah(currentPage * ayahsPerPage);
+            }
+        }
+
+        function playAyah(index) {
+            if (index >= currentAyahs.length) { stopAudio(); return; }
+            activeAyahIndex = index;
+            isAutoPlaying = true;
+            
+            const targetPage = Math.floor(index / ayahsPerPage);
+            if (targetPage !== currentPage) { currentPage = targetPage; renderPage(); }
+
+            audio.src = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${currentAyahs[index].number}.mp3`;
+            audio.play().catch(() => playAyah(index + 1));
+            updateHighlight();
+            updatePlayIcon(true);
+        }
+
+        audio.onended = () => { if(isAutoPlaying) playAyah(activeAyahIndex + 1); };
+
+        function togglePlay() {
+            if (isAutoPlaying) stopAudio();
+            else playAyah(activeAyahIndex >= 0 ? activeAyahIndex : currentPage * ayahsPerPage);
+        }
+
+        function stopAudio() {
+            audio.pause();
+            isAutoPlaying = false;
+            updatePlayIcon(false);
+            updateHighlight();
+        }
+
+        function updatePlayIcon(playing) {
+            document.getElementById('play-icon').innerHTML = playing ? 
+                `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>` : `<path d="M8 5v14l11-7z"/>`;
+        }
+
+        function updateHighlight() {
+            document.querySelectorAll('.ayah-circle').forEach(m => m.classList.remove('active'));
+            const m = document.getElementById(`mark-${activeAyahIndex}`);
+            if (m) {
+                m.classList.add('active');
+                m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Swipe Navigation
+        let startX = 0;
+        document.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        document.addEventListener('touchend', e => {
+            const diff = startX - e.changedTouches[0].clientX;
+            if (diff > 80) flipPage(1); 
+            if (diff < -80) flipPage(-1);
+        });
+    </script>
 </body>
 </html>
